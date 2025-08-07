@@ -8,23 +8,31 @@ export async function onRequest(context) {
         data, // arbitrary space for passing data between middlewares
     } = context;
 
+    // Retrieve the GitHub Client ID from environment variables
     const client_id = env.GITHUB_CLIENT_ID;
 
     try {
+        // Parse the incoming request URL
         const url = new URL(request.url);
+
+        // Construct the GitHub OAuth authorization URL
         const redirectUrl = new URL('https://github.com/login/oauth/authorize');
         redirectUrl.searchParams.set('client_id', client_id);
-        redirectUrl.searchParams.set('redirect_uri', url.origin + '/api/callback');
+        redirectUrl.searchParams.set('redirect_uri', `${url.origin}/api/callback`);
         redirectUrl.searchParams.set('scope', 'repo user');
-        redirectUrl.searchParams.set(
-            'state',
-            crypto.getRandomValues(new Uint8Array(12)).join(''),
-        );
-        return Response.redirect(redirectUrl.href, 301);
+
+        // Generate a random state value for CSRF protection
+        const state = Array.from(crypto.getRandomValues(new Uint8Array(12)))
+            .map(byte => byte.toString(16).padStart(2, '0'))
+            .join('');
+        redirectUrl.searchParams.set('state', state);
+
+        // Redirect the user to GitHub's OAuth page
+        return Response.redirect(redirectUrl.href, 302); // Use 302 for temporary redirects
 
     } catch (error) {
-        console.error(error);
-        return new Response(error.message, {
+        console.error('Error during OAuth redirection:', error);
+        return new Response('Internal Server Error', {
             status: 500,
         });
     }
