@@ -1,7 +1,11 @@
-name = "astro-cloudflare-app"
+name = "perspicaciousman"
 type = "javascript"
 
 [build]
 command = "npm run build"
-upload.format = "directory"
-upload.dir = "./dist"
+
+[site]
+bucket = "./dist"
+
+[upload]
+format = "directory"
