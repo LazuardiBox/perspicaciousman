@@ -1,6 +1,9 @@
 backend:
-  name: git-gateway
-  branch: main
+  name: github
+  repo: LazuardiBox/perspicaciousman
+  branch: main # Branch to update (optional; defaults to master)
+  base_url: https://perspicaciousman.quest
+  auth_endpoint: /api/auth
 
 media_folder: 'src/assets/images'
 public_folder: '/_astro'
