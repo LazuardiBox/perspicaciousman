@@ -26,7 +26,7 @@ const whenExternalScripts = (items: (() => AstroIntegration) | (() => AstroInteg
   hasExternalScripts ? (Array.isArray(items) ? items.map((item) => item()) : [items()]) : [];
 
 export default defineConfig({
-  output: 'static',
+  output: 'server',
 
   integrations: [tailwind({
     applyBaseStyles: false,
@@ -75,11 +75,10 @@ export default defineConfig({
 
   vite: {
     resolve: {
-      alias: {
-        '~': path.resolve(__dirname, './src'),
+      alias: import.meta.env.PROD && {
+        "react-dom/server": "react-dom/server.edge",
       },
     },
-  },
 
   adapter: cloudflare(),
 });
