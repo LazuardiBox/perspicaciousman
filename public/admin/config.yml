@@ -5,8 +5,8 @@ backend:
   base_url: https://perspicaciousman.quest   # Update to http://localhost:3000 for local testing
   auth_endpoint: /api/auth
 
-media_folder: 'public/media'  # Folder where images will be stored
-public_folder: 'media'       # Public URL path for accessing images
+media_folder: 'src/assets/images'
+public_folder: '/_media'
 
 collections:
   - name: 'post'
