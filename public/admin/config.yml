@@ -6,7 +6,7 @@ backend:
   auth_endpoint: /api/auth
 
 media_folder: 'public/media'  # Folder where images will be stored
-public_folder: '_media'       # Public URL path for accessing images
+public_folder: 'media'       # Public URL path for accessing images
 
 collections:
   - name: 'post'
