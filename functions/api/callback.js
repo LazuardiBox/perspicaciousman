@@ -1,78 +1,49 @@
-function renderBody(status, content) {
-    const html = `
-    <script>
-      const receiveMessage = (message) => {
-        window.opener.postMessage(
-          'authorization:github:${status}:${JSON.stringify(content)}',
-          message.origin
-        );
-        window.removeEventListener("message", receiveMessage, false);
-      }
-      window.addEventListener("message", receiveMessage, false);
-      window.opener.postMessage("authorizing:github", "*");
-    </script>
-    `;
-    const blob = new Blob([html]);
-    return blob;
-}
-
 export async function onRequest(context) {
     const {
         request, // same as existing Worker API
         env, // same as existing Worker API
-        params, // if filename includes [id] or [[path]]
-        waitUntil, // same as ctx.waitUntil in existing Worker API
-        next, // used for middleware or to fetch assets
-        data, // arbitrary space for passing data between middlewares
     } = context;
 
-    const client_id = env.GITHUB_CLIENT_ID;
-    const client_secret = env.GITHUB_CLIENT_SECRET;
+    const client_id = "Ov23liHqjrY3q35pIKol";
+    const client_secret = "e4cee3703b9e1d4495b3c9547e016003d9cb65d6";
 
     try {
         const url = new URL(request.url);
+
+        // Extract query parameters
         const code = url.searchParams.get('code');
-        const response = await fetch(
-            'https://github.com/login/oauth/access_token',
-            {
-                method: 'POST',
-                headers: {
-                    'content-type': 'application/json',
-                    'user-agent': 'cloudflare-functions-github-oauth-login-demo',
-                    'accept': 'application/json',
-                },
-                body: JSON.stringify({ client_id, client_secret, code }),
-            },
-        );
-        const result = await response.json();
-        if (result.error) {
-            return new Response(renderBody('error', result), {
-                headers: {
-                    'content-type': 'text/html;charset=UTF-8',
-                },
-                status: 401 
-            });
+        const state = url.searchParams.get('state');
+
+        if (!code || !state) {
+            return new Response('Missing code or state', { status: 400 });
         }
-        const token = result.access_token;
-        const provider = 'github';
-        const responseBody = renderBody('success', {
-            token,
-            provider,
-        });
-        return new Response(responseBody, { 
+
+        // Exchange the authorization code for an access token
+        const tokenResponse = await fetch('https://github.com/login/oauth/access_token', {
+            method: 'POST',
             headers: {
-                'content-type': 'text/html;charset=UTF-8',
+                'Content-Type': 'application/json',
+                'Accept': 'application/json',
             },
-            status: 200 
+            body: JSON.stringify({
+                client_id,
+                client_secret,
+                code,
+                state,
+            }),
         });
+
+        const tokenData = await tokenResponse.json();
+        if (!tokenData.access_token) {
+            return new Response('Failed to retrieve access token', { status: 500 });
+        }
+
+        // Redirect the user back to Decap CMS with the access token
+        const cmsRedirectUrl = `${url.origin}/admin/#access_token=${tokenData.access_token}`;
+        return Response.redirect(cmsRedirectUrl, 302);
 
     } catch (error) {
         console.error(error);
-        return new Response(error.message, {
-            headers: {
-                'content-type': 'text/html;charset=UTF-8',
-            },
-            status: 500,
-        });
+        return new Response(error.message, { status: 500 });
     }
 }

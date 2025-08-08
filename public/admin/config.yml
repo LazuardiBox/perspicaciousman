@@ -2,8 +2,8 @@ backend:
   name: github
   repo: LazuardiBox/perspicaciousman
   branch: main # Branch to update (optional; defaults to master)
-  base_url: perspicaciousman.quest
-  auth_endpoint: /api/auth
+  base_url: https://localhost:4321
+  auth_endpoint: /api/auth  
 
 media_folder: 'src/assets/images'
 public_folder: '/_astro'

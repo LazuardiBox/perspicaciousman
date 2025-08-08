@@ -15,10 +15,6 @@ import astrowind from './vendor/integration';
 
 import { readingTimeRemarkPlugin, responsiveTablesRehypePlugin, lazyImagesRehypePlugin } from './src/utils/frontmatter';
 
-import react from '@astrojs/react';
-
-import cloudflare from '@astrojs/cloudflare';
-
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
 
 const hasExternalScripts = false;
@@ -26,7 +22,7 @@ const whenExternalScripts = (items: (() => AstroIntegration) | (() => AstroInteg
   hasExternalScripts ? (Array.isArray(items) ? items.map((item) => item()) : [items()]) : [];
 
 export default defineConfig({
-  output: 'server',
+  output: 'static',
 
   integrations: [
     tailwind({
@@ -50,11 +46,13 @@ export default defineConfig({
         ],
       },
     }),
+
     ...whenExternalScripts(() =>
       partytown({
         config: { forward: ['dataLayer.push'] },
       })
     ),
+
     compress({
       CSS: true,
       HTML: {
@@ -67,10 +65,10 @@ export default defineConfig({
       SVG: false,
       Logger: 1,
     }),
+
     astrowind({
       config: './src/config.yaml',
     }),
-    react(),
   ],
 
   image: {
@@ -85,10 +83,8 @@ export default defineConfig({
   vite: {
     resolve: {
       alias: {
-        "react-dom/server": "react-dom/server.edge", // Always use the edge-compatible module
+        '~': path.resolve(__dirname, './src'),
       },
     },
   },
-
-  adapter: cloudflare(),
 });
