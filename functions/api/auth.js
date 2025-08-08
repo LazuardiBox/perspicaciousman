@@ -10,7 +10,7 @@ export async function onRequest(context) {
         const url = new URL(request.url);
 
         // Redirect to GitHub's OAuth page
-        const redirectUrl = new URL('https://github.com/login/oauth/authorize');
+        const redirectUri = `${origin}/api/callback`;
         redirectUrl.searchParams.set('client_id', client_id);
         redirectUrl.searchParams.set('redirect_uri', url.origin + '/api/callback'); // Ensure this matches GitHub OAuth App settings
         redirectUrl.searchParams.set('scope', url.searchParams.get('scope') || 'repo user'); // Allow scope to be passed as a query parameter
